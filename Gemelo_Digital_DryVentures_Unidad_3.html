@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gemelo Digital DryVentures | Unidad 3</title>
+<style>
+:root{--navy:#203f5b;--red:#be1923;--bg:#f3f6f9;--text:#263442;--green:#16784b;--amber:#a96800}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+header{background:var(--navy);color:white;padding:22px 5vw}header h1{margin:0 0 6px;font-size:clamp(22px,3vw,32px)}header p{margin:0;color:#dbe6ef}
+main{max-width:1180px;margin:22px auto;padding:0 18px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+button{border:0;border-radius:8px;padding:10px 15px;font-weight:bold;cursor:pointer;background:var(--red);color:white}
+button.secondary{background:var(--navy)}.status{padding:9px 12px;background:white;border-radius:8px;border:1px solid #d8e0e7}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.panel{background:white;border-radius:14px;padding:18px;box-shadow:0 3px 14px #10203012;border-top:5px solid #8995a2}
+.panel.ai{border-color:var(--green)}h2{margin:0 0 8px;font-size:21px}.sub{font-size:13px;color:#647384;margin-bottom:15px}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.metric{padding:12px 8px;background:#f4f7fa;border-radius:10px;text-align:center}
+.metric span{display:block;color:#637184;font-size:12px;margin-bottom:7px}.metric strong{font-size:clamp(18px,2.2vw,26px)}
+.bar{height:9px;background:#e1e7ec;border-radius:10px;overflow:hidden;margin-top:8px}.fill{height:100%;width:0%;background:var(--navy);transition:width .5s}
+.ai .fill{background:var(--green)}
+.message{margin-top:13px;padding:12px;border-radius:9px;background:#f3f6f9;min-height:58px;font-size:14px}
+.message.warn{background:#fff3df;color:#754900}.message.good{background:#e8f7ef;color:#155b3a}
+h3{margin:20px 0 8px;font-size:17px}.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.step{background:white;border-radius:10px;padding:13px;font-size:13px;border:1px solid #dce3e9}.step b{display:block;color:var(--navy);margin-bottom:5px}
+.note{font-size:12px;color:#657384;line-height:1.5;margin:18px 0}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.steps{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<header>
+<h1>Gemelo Digital · DryVentures</h1>
+<p>Simulación académica de máquina rotativa — predicción, recomendación y actuación controlada</p>
+</header>
+<main>
+<div class="toolbar">
+<button id="start">Iniciar simulación</button>
+<button id="pause" class="secondary">Pausar</button>
+<button id="reset" class="secondary">Reiniciar</button>
+<div class="status">Modo: <b id="mode">En espera</b></div>
+<div class="status">Nivel con IA: <b>ACTUAR</b></div>
+</div>
+<div class="grid">
+<section class="panel">
+<h2>Sin IA</h2><div class="sub">Observa el estado actual; no anticipa ni corrige automáticamente el riesgo.</div>
+<div class="metrics">
+<div class="metric"><span>RPM</span><strong id="rpm0">—</strong><div class="bar"><div class="fill" id="barR0"></div></div></div>
+<div class="metric"><span>Temperatura</span><strong id="temp0">—</strong><div class="bar"><div class="fill" id="barT0"></div></div></div>
+<div class="metric"><span>Vibración</span><strong id="vib0">—</strong><div class="bar"><div class="fill" id="barV0"></div></div></div>
+</div>
+<div class="message" id="msg0">Inicie la simulación para observar la evolución de la máquina sin IA.</div>
+</section>
+<section class="panel ai">
+<h2>Con IA</h2><div class="sub">Predice tendencia, recomienda una respuesta y actúa en la simulación para reducir el riesgo.</div>
+<div class="metrics">
+<div class="metric"><span>RPM</span><strong id="rpm1">—</strong><div class="bar"><div class="fill" id="barR1"></div></div></div>
+<div class="metric"><span>Temperatura</span><strong id="temp1">—</strong><div class="bar"><div class="fill" id="barT1"></div></div></div>
+<div class="metric"><span>Vibración</span><strong id="vib1">—</strong><div class="bar"><div class="fill" id="barV1"></div></div></div>
+</div>
+<div class="message good" id="msg1">La IA está preparada. En esta demo, la acción consiste en reducir automáticamente las RPM cuando se detecta riesgo.</div>
+</section>
+</div>
+<h3>Niveles de madurez representados</h3>
+<div class="steps">
+<div class="step"><b>1 · Descriptivo</b>Visualiza RPM, temperatura y vibración actuales.</div>
+<div class="step"><b>2 · Diagnóstico</b>Identifica si la tendencia refleja una condición anómala.</div>
+<div class="step"><b>3 · Predictivo</b>Estima la proximidad al umbral de riesgo.</div>
+<div class="step"><b>4 · Actuar</b>Reduce las RPM simuladas y registra la corrección preventiva.</div>
+</div>
+<p class="note"><b>Nota académica:</b> esta página es una simulación educativa, no un sistema de control industrial. En una instalación real, cualquier acción automática requiere validación de ingeniería, evaluación de riesgos, límites de seguridad y mecanismos de parada independientes de la IA.</p>
+</main>
+<script>
+let timer=null, tick=0, rpmNoAI=1400, rpmAI=1400, tempNoAI=55, vibNoAI=2.2, tempAI=55, vibAI=2.2;
+const $=id=>document.getElementById(id);
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function setMetrics(suffix,rpm,temp,vib){
+  $('rpm'+suffix).textContent=Math.round(rpm).toLocaleString('es-CO');
+  $('temp'+suffix).textContent=temp.toFixed(1)+' °C';
+  $('vib'+suffix).textContent=vib.toFixed(1)+' mm/s';
+  $('barR'+suffix).style.width=clamp((rpm-800)/2800*100,0,100)+'%';
+  $('barT'+suffix).style.width=clamp(temp/100*100,0,100)+'%';
+  $('barV'+suffix).style.width=clamp(vib/12*100,0,100)+'%';
+}
+function step(){
+ tick++;
+ // Shared operating demand is simulated; no user-controlled RPM slider.
+ const demand=clamp(1500 + tick*62 + Math.sin(tick/2)*170,800,3600);
+ rpmNoAI=demand;
+ tempNoAI=clamp(34 + rpmNoAI/3600*49 + tick*0.42,30,105);
+ vibNoAI=clamp(0.7 + Math.pow(rpmNoAI/3600,2)*8.5 + tick*0.06,0.4,14);
+ // AI twin anticipates rising temperature/vibration and acts before the critical threshold.
+ const predictedTemp=34 + demand/3600*49 + (tick+3)*0.42;
+ const predictedVib=0.7 + Math.pow(demand/3600,2)*8.5 + (tick+3)*0.06;
+ let action='Régimen estable: la IA monitoriza y anticipa la tendencia.';
+ if(predictedTemp>=78 || predictedVib>=7.2){
+   rpmAI=clamp(Math.min(demand-420,2200),800,3600);
+   action='ACTUAR: riesgo anticipado. Se reducen las RPM simuladas y se registra una intervención preventiva.';
+ }else{
+   rpmAI=clamp(demand,800,3600);
+ }
+ tempAI=clamp(34 + rpmAI/3600*49 + tick*0.12,30,100);
+ vibAI=clamp(0.7 + Math.pow(rpmAI/3600,2)*8.5 + tick*0.018,0.4,12);
+ setMetrics('0',rpmNoAI,tempNoAI,vibNoAI);
+ setMetrics('1',rpmAI,tempAI,vibAI);
+ $('msg0').className='message '+(tempNoAI>=80||vibNoAI>=8?'warn':'');
+ $('msg0').textContent=tempNoAI>=92?'FALLA SIMULADA: se ha alcanzado el umbral crítico de temperatura.':
+  tempNoAI>=80?'ALERTA: temperatura elevada; el sistema no corrige automáticamente.':
+  vibNoAI>=8?'ALERTA: vibración elevada; requiere revisión.':'Operación en curso sin corrección automática.';
+ $('msg1').className='message '+(predictedTemp>=78||predictedVib>=7.2?'good':'');
+ $('msg1').textContent=action+' Temperatura: '+tempAI.toFixed(1)+' °C; vibración: '+vibAI.toFixed(1)+' mm/s.';
+ $('mode').textContent='En ejecución · ciclo '+tick;
+}
+$('start').onclick=()=>{if(!timer){step();timer=setInterval(step,1400)}};
+$('pause').onclick=()=>{if(timer){clearInterval(timer);timer=null;$('mode').textContent='Pausada'}};
+$('reset').onclick=()=>{if(timer){clearInterval(timer);timer=null}tick=0;rpmNoAI=1400;rpmAI=1400;tempNoAI=55;vibNoAI=2.2;tempAI=55;vibAI=2.2;
+['rpm0','temp0','vib0','rpm1','temp1','vib1'].forEach(id=>$(id).textContent='—');
+['barR0','barT0','barV0','barR1','barT1','barV1'].forEach(id=>$(id).style.width='0%');
+$('msg0').textContent='Inicie la simulación para observar la evolución de la máquina sin IA.';
+$('msg1').textContent='La IA está preparada. En esta demo, la acción consiste en reducir automáticamente las RPM cuando se detecta riesgo.';
+$('msg0').className='message';$('msg1').className='message good';$('mode').textContent='En espera';};
+</script>
+</body>
+</html>
